@@ -1,0 +1,129 @@
+---
+# =========================================================================
+# Simple Ansible Playbook: Basic Web Server Setup
+# =========================================================================
+# Purpose: Minimal web server automation for troubleshooting
+# Use this when the main playbook has package conflicts
+# =========================================================================
+
+- name: Simple AWS Web Server Setup
+  hosts: webservers
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Display start message
+      debug:
+        msg:
+          - "🚀 Starting simple web server setup..."
+          - "🎯 Target: {{ ansible_hostname }}"
+          - "🌐 IP: {{ ansible_default_ipv4.address }}"
+
+    - name: Install Apache web server only
+      yum:
+        name: httpd
+        state: present
+
+    - name: Start and enable Apache
+      systemd:
+        name: httpd
+        state: started
+        enabled: yes
+
+    - name: Create simple success webpage
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>🎉 Ansible Success!</title>
+              <style>
+                  body { 
+                      font-family: Arial; 
+                      text-align: center; 
+                      background: linear-gradient(135deg, #232F3E, #FF9900);
+                      color: white;
+                      padding: 50px;
+                      margin: 0;
+                      min-height: 100vh;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                  }
+                  .container { 
+                      background: white; 
+                      color: #333;
+                      padding: 40px; 
+                      border-radius: 15px; 
+                      max-width: 600px;
+                      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                  }
+                  h1 { color: #232F3E; font-size: 2.5em; }
+                  .success { 
+                      background: #27ae60; 
+                      color: white; 
+                      padding: 20px; 
+                      border-radius: 10px; 
+                      margin: 20px 0; 
+                      font-size: 1.3em;
+                  }
+                  .info { 
+                      background: #f8f9fa; 
+                      padding: 20px; 
+                      border-radius: 10px; 
+                      margin: 20px 0; 
+                  }
+                  .highlight { color: #FF9900; font-weight: bold; }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>🚀 Ansible Works!</h1>
+                  
+                  <div class="success">
+                      ✅ AWS Infrastructure Automated Successfully!
+                  </div>
+                  
+                  <div class="info">
+                      <h3>📊 Server Details</h3>
+                      <p><strong>Hostname:</strong> <span class="highlight">{{ ansible_hostname }}</span></p>
+                      <p><strong>OS:</strong> <span class="highlight">{{ ansible_distribution }} {{ ansible_distribution_version }}</span></p>
+                      <p><strong>IP Address:</strong> <span class="highlight">{{ ansible_default_ipv4.address }}</span></p>
+                      <p><strong>CPU Cores:</strong> <span class="highlight">{{ ansible_processor_vcpus }}</span></p>
+                      <p><strong>Memory:</strong> <span class="highlight">{{ (ansible_memtotal_mb/1024)|round(1) }} GB</span></p>
+                      <p><strong>Configured:</strong> <span class="highlight">{{ ansible_date_time.date }} {{ ansible_date_time.time }}</span></p>
+                  </div>
+                  
+                  <div class="info">
+                      <h3>🎯 What Happened</h3>
+                      <p>✅ Your control machine connected to this target machine</p>
+                      <p>✅ Ansible installed Apache web server automatically</p>
+                      <p>✅ The web service started and is now running</p>
+                      <p>✅ This webpage was created and deployed instantly</p>
+                  </div>
+                  
+                  <div style="margin-top: 30px; padding: 20px; background: #ffd700; color: #333; border-radius: 10px;">
+                      <h3>🏆 Congratulations!</h3>
+                      <p>You've successfully automated AWS infrastructure using Ansible!<br>
+                      This is exactly how DevOps engineers manage servers in production.</p>
+                  </div>
+              </div>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+        mode: "0644"
+
+    - name: Test web server
+      uri:
+        url: "http://{{ ansible_default_ipv4.address }}"
+        status_code: 200
+      register: web_result
+
+    - name: Display success
+      debug:
+        msg:
+          - ""
+          - "🎉 SUCCESS! Web server is running!"
+          - "🌐 Website: http://{{ ansible_default_ipv4.address }}"
+          - "📊 Status: {{ web_result.status }}"
+          - "✅ Automation complete!"
